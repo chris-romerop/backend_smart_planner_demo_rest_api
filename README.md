@@ -1,6 +1,6 @@
 # Smart Planner Demo REST API
 
-A simple REST API made with Spring Boot to Manage general purpose Projects.
+A simple REST API made with Spring Boot to manage general purpose Projects.
 This is a simple example about how to make a backend using Spring Boot and
 DynamoDB NoSQL database.
 

@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.whiteholelabs.smartplannerdemo.model.Project;
+import com.whiteholelabs.smartplannerdemo.publisher.RabbitMQSender;
 import com.whiteholelabs.smartplannerdemo.service.ProjectService;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -49,12 +50,15 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private RabbitMQSender sender;
+
     /// Creates or Updates a Project.
     @PostMapping("/project")
-    public ResponseEntity<Project> saveProject(@RequestBody Project project) {
+    public ResponseEntity<Void> saveProject(@RequestBody Project project) {
         log.trace("Post save Project");
-        return projectService.saveProject(project).map(newProject -> new ResponseEntity<>(newProject, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.CONFLICT));
+        sender.sendMessage("project.save", project);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /// Gets a specified Project by its ID.
@@ -68,9 +72,8 @@ public class ProjectController {
     /// Deletes an existent Project.
     @DeleteMapping("/project")
     public ResponseEntity<Void> deleteProject(@RequestBody Project project) {
-        return projectService.deleteProject(project)
-                ? new ResponseEntity<>(HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        sender.sendMessage("project.delete", project);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /// Gets a list of all existent Projects.
